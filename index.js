@@ -51,6 +51,65 @@ app.get('/webhook', function(req, res) {
   }  
 });
 
+const rollDice = (dice) => {
+    for (var i = 0; i < dice.length; i++){
+        if(isNaN(Number(dice[i])) && dice[i] != 'd'){
+            dice = e.slice(i+1)
+        }
+    }
+
+    var values = dice.split('d')
+    values[0] = Number(values[0]) > 0 ? Number(values[0]) : 1
+    var res = '( '
+    for(var i = 0; i < values[0]; i++){
+        res += Math.floor(Math.random() * values[1])+1
+        if (i < values[0] - 1) res += ' + '
+    }
+    res += ' )'
+    return {roll: dice, result: res}
+}
+
+const handleRoll = (text) => {
+    // console.log(msg.body)
+    // let msgBody = msg.body
+    // let thread  = msg.threadID
+
+    var body = ''
+    if(text.indexOf('help') >= 0) {
+        return 'with roll any mathematical operation will be executed and combinations of {n}d{faces} will roll a die with {faces} faces {n} times, for example: roll 2*3d6+2'
+    }
+
+    let roll = text.split(' ')[1]
+    let rolls = []
+
+    for (var i = 0; i < roll.length; i++){
+        if(roll[i] == 'd'){
+            var tmp = roll.slice(i-1);
+            var j;
+            for(j = 0; j < tmp.length; j++){
+                if(isNaN(Number(tmp[j]))) break
+            }
+            rolls.push(roll.slice(i-1, i+j+1))
+        }
+    }
+
+    var rollsResults = []
+
+    rolls.forEach((e, idx) => {
+        rollsResults[idx] = rollDice(e)
+    })
+
+    rollsResults.forEach((e, idx) => {
+        roll = roll.replace(e.roll, e.result)
+    })
+
+    body = roll + ' = ' + eval(roll)
+
+    console.log(body)
+    return body
+}
+
+var rollPattern = /roll/i;
 app.post('/webhook/', function (req, res) {
     let messaging_events = req.body.entry[0].messaging
     for (let i = 0; i < messaging_events.length; i++) {
@@ -58,11 +117,14 @@ app.post('/webhook/', function (req, res) {
         let sender = event.sender.id
         if (event.message && event.message.text) {
             let text = event.message.text
-        if (text === 'Generic') {
-            sendGenericMessage(sender)
-            continue
-        }
-        sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
+            if (rollPattern.test(text)) {
+                sendTextMessage(sender, "Rolled " + handleRoll(text))
+            }
+            if (text === 'Generic') {
+                sendGenericMessage(sender)
+                continue
+            }
+            // sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
         }
         if (event.postback) {
             let text = JSON.stringify(event.postback)
