@@ -48,77 +48,16 @@ app.get('/webhook', function(req, res) {
   } else {
     console.error("Failed validation. Make sure the validation tokens match.");
     res.sendStatus(403);          
-  }  
+  }
 });
 
-const rollDice = (dice) => {
-    for (var i = 0; i < dice.length; i++){
-        if(isNaN(Number(dice[i])) && dice[i] != 'd'){
-            dice = e.slice(i+1)
-        }
-    }
-
-    var values = dice.split('d')
-    values[0] = Number(values[0]) > 0 ? Number(values[0]) : 1
-    var res = '( '
-    for(var i = 0; i < values[0]; i++){
-        res += Math.floor(Math.random() * values[1])+1
-        if (i < values[0] - 1) res += ' + '
-    }
-    res += ' )'
-    return {roll: dice, result: res}
-}
-
-const handleRoll_old = (text) => {
-    // console.log(msg.body)
-    // let msgBody = msg.body
-    // let thread  = msg.threadID
-
-    var body = ''
-    if(text.indexOf('help') >= 0) {
-        return 'with roll any mathematical operation will be executed and combinations of {n}d{faces} will roll a die with {faces} faces {n} times, for example: roll 2*3d6+2'
-    }
-
-    let roll = text.split(' ')[1]
-    let rolls = []
-
-    for (var i = 0; i < roll.length; i++){
-        if(roll[i] == 'd'){
-            var tmp = roll.slice(i-1);
-            var j;
-            for(j = 0; j < tmp.length; j++){
-                if(isNaN(Number(tmp[j]))) break
-            }
-            rolls.push(roll.slice(i-1, i+j+1))
-        }
-    }
-
-    var rollsResults = []
-
-    rolls.forEach((e, idx) => {
-        rollsResults[idx] = rollDice(e)
-    })
-
-    rollsResults.forEach((e, idx) => {
-        roll = roll.replace(e.roll, e.result)
-    })
-
-    body = roll + ' = ' + eval(roll)
-
-    console.log(body)
-    return body
-}
-
 const handleRoll = (match) => {
-    for (var i = match.length - 1; i >= 0; i--) {
-        console.log("roll match " + i + ":" + match[i])
-    }
     if (match.length < 2) {
         console.log("bad match")
         return 0
     }
-    var n = (Number(match[1]) > 0) ? Number(match[0]) : 1
-    var f = (Number(match[2]) > 0) ? Number(match[1]) : 1
+    var n = (Number(match[1]) > 0) ? Number(match[1]) : 1
+    var f = (Number(match[2]) > 0) ? Number(match[2]) : 1
     console.log("Rolling with n=" + n + " f=" + f)
     var res = 0
     for(var i = 0; i < n; i++){
