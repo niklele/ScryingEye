@@ -113,12 +113,13 @@ const handleRoll = (match) => {
     for (var i = match.length - 1; i >= 0; i--) {
         console.log("roll match " + i + ":" + match[i])
     }
-    if (match.length < 3) {
+    if (match.length < 2) {
         console.log("bad match")
         return 0
     }
     var n = (Number(match[1]) > 0) ? Number(match[0]) : 1
     var f = (Number(match[2]) > 0) ? Number(match[1]) : 1
+    console.log("Rolling with n=" + n + " f=" + f)
     var res = 0
     for(var i = 0; i < n; i++){
         res += Math.floor(Math.random() * f) + 1
