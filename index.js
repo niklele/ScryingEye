@@ -66,7 +66,7 @@ function sendTextMessage(sender, text) {
     let messageData = { text:text }
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
-        qs: {access_token:token},
+        qs: {access_token:PAGE_ACCESS_TOKEN},
         method: 'POST',
         json: {
             recipient: {id:sender},
@@ -80,8 +80,6 @@ function sendTextMessage(sender, text) {
         }
     })
 }
-
-const token = "<PAGE_ACCESS_TOKEN>"
 
 // Index route
 app.get('/', function (req, res) {
