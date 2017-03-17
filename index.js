@@ -13,6 +13,8 @@ app.use(bodyParser.urlencoded({extended: false}))
 // Process application/json
 app.use(bodyParser.json())
 
+app.use(express.static('public'))
+
 /*
  * Be sure to setup your config values before running this code. You can 
  * set them using environment variables or modifying the config file in /config.
@@ -99,7 +101,7 @@ function sendGenericMessage(sender) {
                 "elements": [{
                     "title": "First card",
                     "subtitle": "Element #1 of an hscroll",
-                    "image_url": "https://scryingeye.herokuapp.com/assets/crystal-ball.png",
+                    "image_url": "https://scryingeye.herokuapp.com/crystal-ball.png",
                     "buttons": [ {
                         "type": "web_url",
                         "url": "https://www.messenger.com",
