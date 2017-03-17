@@ -69,7 +69,7 @@ const rollDice = (dice) => {
     return {roll: dice, result: res}
 }
 
-const handleRoll = (text) => {
+const handleRoll_old = (text) => {
     // console.log(msg.body)
     // let msgBody = msg.body
     // let thread  = msg.threadID
@@ -109,7 +109,24 @@ const handleRoll = (text) => {
     return body
 }
 
-var rollPattern = /roll/i;
+const handleRoll = (match) => {
+    for (var i = match.length - 1; i >= 0; i--) {
+        console.log("roll match " + i + ":" + match[i])
+    }
+    if (match.length < 3) {
+        console.log("bad match")
+        return 0
+    }
+    var n = (Number(match[1]) > 0) ? Number(match[0]) : 1
+    var f = (Number(match[2]) > 0) ? Number(match[1]) : 1
+    var res = 0
+    for(var i = 0; i < n; i++){
+        res += Math.floor(Math.random() * f) + 1
+    }
+    return res
+}
+
+var rollPattern = /roll ([0-9]+)[Dd]([0-9]+)/i;
 app.post('/webhook/', function (req, res) {
     let messaging_events = req.body.entry[0].messaging
     for (let i = 0; i < messaging_events.length; i++) {
@@ -117,8 +134,10 @@ app.post('/webhook/', function (req, res) {
         let sender = event.sender.id
         if (event.message && event.message.text) {
             let text = event.message.text
-            if (rollPattern.test(text)) {
-                sendTextMessage(sender, "Rolled " + handleRoll(text))
+            var match = rollPattern.exec(text)
+            if (match != null) {
+                let result = handleRoll(match)
+                sendTextMessage(sender, "Rolled " + result)
             }
             if (text === 'Generic') {
                 sendGenericMessage(sender)
