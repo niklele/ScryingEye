@@ -51,6 +51,7 @@ app.get('/webhook', function(req, res) {
   }
 });
 
+// TODO handle addition eg. Roll 1d4 + 4
 const handleRoll = (match) => {
     if (match.length < 2) {
         console.log("bad match")
@@ -79,11 +80,11 @@ app.post('/webhook/', function (req, res) {
                 let result = handleRoll(match)
                 sendTextMessage(sender, "Rolled " + result)
             }
-            if (text === 'Generic') {
-                sendGenericMessage(sender)
-                continue
-            }
-            // sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
+            // TODO look up monster and spell info
+            // if (text === 'Generic') {
+            //     sendGenericMessage(sender)
+            //     continue
+            // }
         }
         if (event.postback) {
             let text = JSON.stringify(event.postback)
