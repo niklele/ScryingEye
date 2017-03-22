@@ -18,7 +18,6 @@ app.use(express.static('public'))
 /*
  * Be sure to setup your config values before running this code. You can 
  * set them using environment variables or modifying the config file in /config.
- *
  */
 
 // App Secret can be retrieved from the App Dashboard
@@ -30,11 +29,7 @@ const VALIDATION_TOKEN = process.env.MESSENGER_VALIDATION_TOKEN
 // Generate a page access token for your page from the App Dashboard
 const PAGE_ACCESS_TOKEN = process.env.MESSENGER_PAGE_ACCESS_TOKEN
 
-// URL where the app is running (include protocol). Used to point to scripts and 
-// assets located at this address. 
-const SERVER_URL = process.env.SERVER_URL
-
-if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
+if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN)) {
   console.error("Missing config values");
   process.exit(1);
 }
@@ -51,23 +46,29 @@ app.get('/webhook', function(req, res) {
   }
 });
 
-// TODO handle addition eg. Roll 1d4 + 4
 const handleRoll = (match) => {
-    if (match.length < 2) {
+    // matches are: [full text, number of dice, number of sides on dice, constant]
+    if (match.length < 3) {
         console.log("bad match")
         return 0
     }
-    var n = (Number(match[1]) > 0) ? Number(match[1]) : 1
-    var f = (Number(match[2]) > 0) ? Number(match[2]) : 1
-    console.log("Rolling with n=" + n + " f=" + f)
-    var res = 0
-    for(var i = 0; i < n; i++){
+    let n = (Number(match[1]) > 0) ? Number(match[1]) : 1
+    let f = (Number(match[2]) > 0) ? Number(match[2]) : 1
+    let res = 0
+    for(let i = 0; i < n; i++){
         res += Math.floor(Math.random() * f) + 1
+    }
+    if (!isNaN(Number(match[3]))) {
+        let c = Number(match[3])
+        res += c
+        console.log("Rolled n=" + n + " f=" + f + " c=" + c + " res=" + res)
+    } else {
+        console.log("Rolled n=" + n + " f=" + f + " res=" + res)
     }
     return res
 }
 
-var rollPattern = /roll ([0-9]+)[Dd]([0-9]+)/i;
+var rollPattern = /roll (\d+)[Dd](\d+)\+?(\d+)?/i;
 app.post('/webhook/', function (req, res) {
     let messaging_events = req.body.entry[0].messaging
     for (let i = 0; i < messaging_events.length; i++) {
@@ -75,7 +76,7 @@ app.post('/webhook/', function (req, res) {
         let sender = event.sender.id
         if (event.message && event.message.text) {
             let text = event.message.text
-            var match = rollPattern.exec(text)
+            let match = rollPattern.exec(text)
             if (match != null) {
                 let result = handleRoll(match)
                 sendTextMessage(sender, "Rolled " + result)
